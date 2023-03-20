@@ -31,7 +31,7 @@ const USER_ID = `USER_ID`;
 const EXTERNAL_ID = `STRIPE_CHECKOUT_SESSION_ID`;
 
 describe("AccountSystem", () => {
-  let transaction;
+  let transaction: any;
 
   afterAll(async () => {
     await system.deleteTransaction({ transaction_id: transaction.id });

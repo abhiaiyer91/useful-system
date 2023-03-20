@@ -40,7 +40,7 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async deleteWallet({ user_id }) {
+  async deleteWallet({ user_id }: { user_id: string }) {
     const { error } = await this.db
       .from(`wallets`)
       .delete()
@@ -60,7 +60,11 @@ export class AccountsSystem {
     user_id: string;
     balance: number;
   }) {
-    const wallet = await this.getWallet(user_id);
+    let wallet = await this.getWallet(user_id);
+
+    if (!wallet) {
+      wallet = await this.openWallet(user_id);
+    }
 
     const newBalance = wallet.balance + (method === `add` ? balance : -balance);
 
@@ -78,7 +82,7 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async getWallet(user_id) {
+  async getWallet(user_id: string) {
     const { data, error } = await this.db
       .from(`wallets`)
       .select("*")
@@ -92,7 +96,7 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async getTransactions({ user_id }) {
+  async getTransactions({ user_id }: { user_id: string }) {
     const { data, error } = await this.db
       .from(`transactions`)
       .select("*")
@@ -106,7 +110,7 @@ export class AccountsSystem {
     return data;
   }
 
-  async getTransactionById({ transaction_id }) {
+  async getTransactionById({ transaction_id }: { transaction_id: string }) {
     const { data, error } = await this.db
       .from(`transactions`)
       .select("*")
@@ -120,7 +124,7 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async getTransactionByExternalId({ external_id }) {
+  async getTransactionByExternalId({ external_id }: { external_id: string }) {
     const { data, error } = await this.db
       .from(`transactions`)
       .select("*")
@@ -135,7 +139,17 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async createTransaction({ user_id, description, externalId, type }) {
+  async createTransaction({
+    user_id,
+    description,
+    externalId,
+    type,
+  }: {
+    type: string;
+    externalId: string;
+    user_id: string;
+    description: string;
+  }) {
     const { data, error } = await this.db
       .from(`transactions`)
       .upsert({ user_id, description, type, external_id: externalId })
@@ -150,7 +164,13 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async setTransactionStatus({ transaction_id, status }) {
+  async setTransactionStatus({
+    transaction_id,
+    status,
+  }: {
+    transaction_id: string;
+    status: string;
+  }) {
     const { error } = await this.db
       .from(`transactions`)
       .update({ status })
@@ -162,7 +182,7 @@ export class AccountsSystem {
     }
   }
 
-  async deleteTransaction({ transaction_id }) {
+  async deleteTransaction({ transaction_id }: { transaction_id: string }) {
     const { error } = await this.db
       .from(`transactions`)
       .delete()
@@ -179,18 +199,24 @@ export class AccountsSystem {
     checkout_obj: {
       id: string;
       line_items: {
-        id: string;
-        quantity: number;
-      }[];
+        data: {
+          id: string;
+          price: {
+            id: string;
+          };
+          quantity: number;
+        }[];
+      };
     };
   }) {
     const external_id = checkout_obj.id;
 
     const tx = await this.getTransactionByExternalId({ external_id });
 
-    const balanceAdjustment = checkout_obj.line_items
-      .filter(({ id }) => {
-        return id === this.product_id;
+    const balanceAdjustment = checkout_obj.line_items?.data
+      .filter((result) => {
+        console.log(result);
+        return result.price.id === this.product_id;
       })
       .map(({ quantity }) => {
         return quantity;
@@ -204,7 +230,7 @@ export class AccountsSystem {
     });
   }
 
-  async resolveTransaction({ transaction_id }) {
+  async resolveTransaction({ transaction_id }: { transaction_id: string }) {
     const transaction = await this.getTransactionById({
       transaction_id,
     });
@@ -224,5 +250,10 @@ export class AccountsSystem {
         throw new Error("Unsupport type found");
       }
     }
+
+    await this.setTransactionStatus({
+      transaction_id: transaction.id,
+      status: `COMPLETE`,
+    });
   }
 }
