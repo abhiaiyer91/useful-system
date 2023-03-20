@@ -183,6 +183,10 @@ class AccountsSystem {
                     throw new Error("Unsupport type found");
                 }
             }
+            yield this.setTransactionStatus({
+                transaction_id: transaction.id,
+                status: `COMPLETE`,
+            });
         });
     }
 }
