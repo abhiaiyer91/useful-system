@@ -9,6 +9,8 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const [wallet, setWallet] = useState<{ balance: number }>({ balance: 0 });
 
+  const [txs, setTxs] = useState([]);
+
   useEffect(() => {
     if (typeof window !== `undefined`) {
       window
@@ -25,6 +27,22 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== `undefined`) {
+      window
+        .fetch("/api/get-transactions", {
+          method: `GET`,
+          headers: {
+            "x-user-id": "USER",
+          },
+        })
+        .then((res) => res.json())
+        .then(({ data }: any) => {
+          setTxs(data);
+        });
+    }
+  }, []);
+
   return (
     <>
       <Head>
@@ -34,7 +52,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.grid}>
+        <div>
           <button
             onClick={() => {
               window
@@ -59,6 +77,19 @@ export default function Home() {
           </button>
 
           <p>Balance: {wallet?.balance || 0}</p>
+          <div>
+            <h1>Transactions</h1>
+            <div style={{ marginTop: `10px` }}>
+              {txs?.map((tx) => {
+                return (
+                  <div style={{ marginBottom: `10px` }}>
+                    <p>{tx.id}</p>
+                    <p>{tx.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </main>
     </>
