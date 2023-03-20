@@ -1,6 +1,7 @@
 // This is your test secret API key.
 
 import { createClient } from "@supabase/supabase-js";
+import { AccountsSystem } from "credit-system";
 
 const stripe = require("stripe")(
   "sk_test_51MnjF3Dfxj6lEmZePwkoHrG49im7rfXi9XoEdzCEHshV3sXWMucJdep30ODed0yWCVPbaoOY2qeYRGXG7qGD9XTo00bnd2ZW71"
@@ -8,7 +9,7 @@ const stripe = require("stripe")(
 
 const YOUR_DOMAIN = "http://localhost:3000";
 
-import { AccountsSystem } from "../../../../../dist/src/index";
+
 
 const db = createClient(
   "https://tsiddebqgokuesfocrti.supabase.co",

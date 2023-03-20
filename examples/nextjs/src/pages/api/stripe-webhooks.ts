@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { AccountsSystem } from "../../../../../dist/src/index";
+import { AccountsSystem } from "credit-system";
 
 const stripe = require("stripe")(
   "sk_test_51MnjF3Dfxj6lEmZePwkoHrG49im7rfXi9XoEdzCEHshV3sXWMucJdep30ODed0yWCVPbaoOY2qeYRGXG7qGD9XTo00bnd2ZW71"

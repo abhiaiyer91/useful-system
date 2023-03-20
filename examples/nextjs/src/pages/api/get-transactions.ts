@@ -1,8 +1,7 @@
 // This is your test secret API key.
 
 import { createClient } from "@supabase/supabase-js";
-
-import { AccountsSystem } from "../../../../../dist/src/index";
+import { AccountsSystem } from "credit-system";
 
 const db = createClient(
   "https://tsiddebqgokuesfocrti.supabase.co",
