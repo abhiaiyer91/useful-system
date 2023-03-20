@@ -76,6 +76,29 @@ export default function Home() {
             Buy a token
           </button>
 
+          <button
+            onClick={() => {
+              window
+                .fetch("/api/spend-token", {
+                  method: `POST`,
+                  headers: {
+                    "x-user-id": "USER",
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    quantity: 1,
+                  }),
+                })
+                .then((res) => res.json())
+                .then(({ data }) => {
+                  setWallet(data);
+                })
+                .catch((e) => console.error(e));
+            }}
+          >
+            Spend a token
+          </button>
+
           <p>Balance: {wallet?.balance || 0}</p>
           <div>
             <h1>Transactions</h1>

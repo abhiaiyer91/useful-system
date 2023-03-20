@@ -111,11 +111,11 @@ class AccountsSystem {
             return data === null || data === void 0 ? void 0 : data[0];
         });
     }
-    createTransaction({ user_id, description, externalId, type, }) {
+    createTransaction({ user_id, description, externalId, type, balance, }) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data, error } = yield this.db
                 .from(`transactions`)
-                .upsert({ user_id, description, type, external_id: externalId })
+                .upsert({ user_id, description, type, external_id: externalId, balance })
                 .select("*")
                 .limit(1);
             if (error) {
@@ -170,13 +170,21 @@ class AccountsSystem {
             const transaction = yield this.getTransactionById({
                 transaction_id,
             });
-            const externalObj = yield this.fetchExternalObject({
-                external_id: transaction.external_id,
-                type: transaction.type,
-            });
             switch (transaction.type) {
                 case "STRIPE_CHECKOUT_SESSION": {
+                    const externalObj = yield this.fetchExternalObject({
+                        external_id: transaction.external_id,
+                        type: transaction.type,
+                    });
                     yield this.resolveStripeType({ checkout_obj: externalObj });
+                    break;
+                }
+                case "SPEND_BALANCE": {
+                    yield this.adjustBalance({
+                        user_id: transaction.user_id,
+                        balance: transaction.balance,
+                        method: `subtract`,
+                    });
                     break;
                 }
                 default: {

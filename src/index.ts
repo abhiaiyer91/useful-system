@@ -68,6 +68,10 @@ export class AccountsSystem {
 
     const newBalance = wallet.balance + (method === `add` ? balance : -balance);
 
+    if (newBalance < 0) {
+      throw new Error("Cannot adjust balance to below zero");
+    }
+
     const { data, error } = await this.db
       .from(`wallets`)
       .upsert({ user_id, balance: newBalance })
@@ -144,7 +148,9 @@ export class AccountsSystem {
     description,
     externalId,
     type,
+    balance,
   }: {
+    balance?: number;
     type: string;
     externalId: string;
     user_id: string;
@@ -152,7 +158,7 @@ export class AccountsSystem {
   }) {
     const { data, error } = await this.db
       .from(`transactions`)
-      .upsert({ user_id, description, type, external_id: externalId })
+      .upsert({ user_id, description, type, external_id: externalId, balance })
       .select("*")
 
       .limit(1);
@@ -235,25 +241,41 @@ export class AccountsSystem {
       transaction_id,
     });
 
-    const externalObj = await this.fetchExternalObject({
-      external_id: transaction.external_id,
-      type: transaction.type,
-    });
+    try {
+      switch (transaction.type) {
+        case "STRIPE_CHECKOUT_SESSION": {
+          const externalObj = await this.fetchExternalObject({
+            external_id: transaction.external_id,
+            type: transaction.type,
+          });
 
-    switch (transaction.type) {
-      case "STRIPE_CHECKOUT_SESSION": {
-        await this.resolveStripeType({ checkout_obj: externalObj });
-        break;
+          await this.resolveStripeType({ checkout_obj: externalObj });
+          break;
+        }
+
+        case "SPEND_BALANCE": {
+          await this.adjustBalance({
+            user_id: transaction.user_id,
+            balance: transaction.balance,
+            method: `subtract`,
+          });
+          break;
+        }
+
+        default: {
+          throw new Error("Unsupport type found");
+        }
       }
 
-      default: {
-        throw new Error("Unsupport type found");
-      }
+      await this.setTransactionStatus({
+        transaction_id: transaction.id,
+        status: `COMPLETE`,
+      });
+    } catch (e) {
+      await this.setTransactionStatus({
+        transaction_id: transaction.id,
+        status: `FAILED`,
+      });
     }
-
-    await this.setTransactionStatus({
-      transaction_id: transaction.id,
-      status: `COMPLETE`,
-    });
   }
 }
