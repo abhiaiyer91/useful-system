@@ -1,11 +1,13 @@
 {
-  "name": "credit-system",
+  "name": "wallet-system",
   "version": "0.0.1",
   "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "@supabase/supabase-js": "^2.11.0",
-    "ts-jest": "^29.0.5"
+    "ts-jest": "^29.0.5",
+    "twilio": "^4.8.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
