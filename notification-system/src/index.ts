@@ -6,8 +6,10 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 interface Message {
-  to: string;
-  from: string;
+  to_email: string;
+  to_sms: string;
+  from_email: string;
+  from_sms: string;
   subject: string;
   text: string;
   html: string;
@@ -81,6 +83,17 @@ export class NotificationSystem {
     return data?.[0];
   }
 
+  async deleteNotificationSetting({ user_id }: { user_id: string }) {
+    const { error } = await this.db
+      .from(`notification_settings`)
+      .delete()
+      .eq("user_id", user_id);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   async sendNotificationToUser({
     user_id,
     message,
@@ -116,7 +129,13 @@ export class NotificationSystem {
     );
   }
 
-  async sendEmail({ to, from, subject, text, html }: Message) {
+  async sendEmail({
+    to_email: to,
+    from_email: from,
+    subject,
+    text,
+    html,
+  }: Message) {
     if (this.debug) {
       console.log("Sending email", {
         to,
@@ -136,7 +155,7 @@ export class NotificationSystem {
     });
   }
 
-  async sendSms({ to, from, text }: Message) {
+  async sendSms({ to_sms: to, from_sms: from, text }: Message) {
     if (this.debug) {
       console.log("Sending sms", {
         to,
