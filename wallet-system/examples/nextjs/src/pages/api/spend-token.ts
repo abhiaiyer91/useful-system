@@ -2,7 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-import { AccountsSystem } from "credit-system";
+import { AccountsSystem } from "useful-wallet-system";
 
 const db = createClient(
   "https://tsiddebqgokuesfocrti.supabase.co",

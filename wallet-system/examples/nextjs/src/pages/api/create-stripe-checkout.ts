@@ -1,7 +1,7 @@
 // This is your test secret API key.
 
 import { createClient } from "@supabase/supabase-js";
-import { AccountsSystem } from "credit-system";
+import { AccountsSystem } from "useful-wallet-system";
 
 const stripe = require("stripe")(
   "sk_test_51MnjF3Dfxj6lEmZePwkoHrG49im7rfXi9XoEdzCEHshV3sXWMucJdep30ODed0yWCVPbaoOY2qeYRGXG7qGD9XTo00bnd2ZW71"
