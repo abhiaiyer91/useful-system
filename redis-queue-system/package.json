@@ -1,0 +1,13 @@
+{
+  "name": "redis-queue-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "bullmq": "^3.10.1"
+  }
+}
