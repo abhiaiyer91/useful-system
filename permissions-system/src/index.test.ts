@@ -1,137 +1,81 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { AccountsSystem } from "./";
+import { PermissionsSystem } from "./";
 
 const supabase = createClient(
   "https://tsiddebqgokuesfocrti.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzaWRkZWJxZ29rdWVzZm9jcnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyNjI5MTAsImV4cCI6MTk5NDgzODkxMH0.OKEN7AXSxGvwNqebuPq9mE5XFAq574iOm9Aqm_ytcx0"
 );
 
-const system = new AccountsSystem({
+const system = new PermissionsSystem({
   db: supabase,
-  product_id: `test`,
-  fetchExternalObject: ({ type, external_id }) => {
-    if (type === `STRIPE_CHECKOUT_SESSION`) {
-      return {
-        id: external_id,
-        line_items: [
-          {
-            id: `test`,
-            quantity: 100,
-          },
-        ],
-      };
-    }
-
-    return null;
-  },
 });
 
 const USER_ID = `USER_ID`;
-const EXTERNAL_ID = `STRIPE_CHECKOUT_SESSION_ID`;
+const PROJECT_ID = `PROJECT_ID`;
 
-describe("AccountSystem", () => {
-  let transaction: any;
-
+describe("PermissionsSystem", () => {
   afterAll(async () => {
-    await system.deleteTransaction({ transaction_id: transaction.id });
-    await system.deleteWallet({ user_id: USER_ID });
-  });
-
-  it("Open wallet", async () => {
-    const wallet = await system.openWallet(USER_ID);
-
-    expect(wallet.user_id).toBe(USER_ID);
-  });
-  it("Returns wallet balance", async () => {
-    const wallet = await system.getWallet(USER_ID);
-
-    expect(wallet.balance).toBe(0);
-  });
-
-  it("adjustBalance", async () => {
-    await system.adjustBalance({
+    await system.deletePermission({
+      resource_id: PROJECT_ID,
       user_id: USER_ID,
-      balance: 10,
-      method: `add`,
     });
+  });
 
-    let wallet = await system.getWallet(USER_ID);
-
-    expect(wallet.balance).toBe(10);
-
-    await system.adjustBalance({
+  it("upsertPermissions", async () => {
+    const permission = await system.upsertPermissions({
       user_id: USER_ID,
-      balance: 5,
-      method: `subtract`,
+      resource_id: PROJECT_ID,
+      resource_type: `PROJECT`,
+      can_read: true,
+      can_write: true,
     });
 
-    wallet = await system.getWallet(USER_ID);
-
-    expect(wallet.balance).toBe(5);
+    expect(permission.user_id).toBe(USER_ID);
+    expect(permission.resource_id).toBe(PROJECT_ID);
   });
 
-  it("createTransaction", async () => {
-    transaction = await system.createTransaction({
+  it("getPermission", async () => {
+    const permission = await system.getPermission({
       user_id: USER_ID,
-      type: `STRIPE_CHECKOUT_SESSION`,
-      description: `Purchasing tokens via Stripe Checkout`,
-      externalId: `STRIPE_CHECKOUT_SESSION_ID`,
+      resource_id: PROJECT_ID,
     });
 
-    expect(transaction.id).toBeTruthy();
+    expect(permission.user_id).toBe(USER_ID);
+    expect(permission.resource_id).toBe(PROJECT_ID);
   });
 
-  it("getTransactionById", async () => {
-    const tx = await system.getTransactionById({
-      transaction_id: transaction.id,
+  it("can", async () => {
+    const canRead = await system.can({
+      user_id: USER_ID,
+      resource_id: PROJECT_ID,
+      permission: `can_read`,
     });
 
-    expect(tx.user_id).toBe(USER_ID);
+    expect(canRead).toBe(true);
+
+    const canWrite = await system.can({
+      user_id: USER_ID,
+      resource_id: PROJECT_ID,
+      permission: `can_write`,
+    });
+    expect(canWrite).toBe(true);
   });
 
-  it("getTransactions", async () => {
-    const transactions = await system.getTransactions({
+  it("getResourcesForUser", async () => {
+    const resources = await system.getResourcesForUser({
       user_id: USER_ID,
     });
 
-    expect(transactions.length).toBeGreaterThan(0);
+    expect(resources.length).toBe(1);
   });
 
-  it("getTransactionByExternalId", async () => {
-    const tx = await system.getTransactionByExternalId({
-      external_id: EXTERNAL_ID,
+  it("getResourcesForUserByResourceType", async () => {
+    const resources = await system.getResourcesForUserByResourceType({
+      user_id: USER_ID,
+      resource_type: `PROJECT`,
     });
 
-    expect(tx.id).toBe(transaction.id);
-  });
-
-  it("setTransactionStatus", async () => {
-    await system.setTransactionStatus({
-      transaction_id: transaction.id,
-      status: `COMPLETE`,
-    });
-
-    const tx = await system.getTransactionById({
-      transaction_id: transaction.id,
-    });
-
-    expect(tx.status).toBe(`COMPLETE`);
-  });
-
-  it("resolveTransaction", async () => {
-    await system.resolveTransaction({
-      transaction_id: transaction.id,
-    });
-
-    const tx = await system.getTransactionById({
-      transaction_id: transaction.id,
-    });
-
-    let wallet = await system.getWallet(USER_ID);
-
-    expect(wallet.balance).toBe(105);
-
-    expect(tx.status).toBe(`COMPLETE`);
+    expect(resources.length).toBe(1);
   });
 });

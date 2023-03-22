@@ -32,6 +32,39 @@ export class PermissionsSystem {
     return data?.[0];
   }
 
+  async getResourcesForUser({ user_id }: { user_id: string }) {
+    const { data, error } = await this.db
+      .from(`permissions`)
+      .select("*")
+      .eq("user_id", user_id);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
+  async getResourcesForUserByResourceType({
+    user_id,
+    resource_type,
+  }: {
+    user_id: string;
+    resource_type: string;
+  }) {
+    const { data, error } = await this.db
+      .from(`permissions`)
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("resource_type", resource_type);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  }
+
   async getPermission({
     user_id,
     resource_id,
@@ -78,7 +111,7 @@ export class PermissionsSystem {
     resource_id: string;
   }) {
     const { error } = await this.db
-      .from(`wallets`)
+      .from(`permissions`)
       .delete()
       .eq("user_id", user_id)
       .eq("resource_id", resource_id);
