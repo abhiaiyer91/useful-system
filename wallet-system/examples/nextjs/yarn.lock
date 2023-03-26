@@ -2304,10 +2304,10 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-useful-wallet-system@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/useful-wallet-system/-/useful-wallet-system-0.0.1.tgz#e0b4852aa346eb4047631acfb7c6568ea4a9f044"
-  integrity sha512-KLlWen/4FUzQBFGbaJAOkZnkMRfzhTReZWZXwxs14H/zQCsMN6D1bha0B1LMvNyOhQ0sccj33Fs5U0CGHBoWJw==
+useful-wallet-system@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/useful-wallet-system/-/useful-wallet-system-0.0.2.tgz#b8fe631d1214216caacf335c5163ab1196e6505c"
+  integrity sha512-DWvpS+xBehM7IcmtKMJWMHFcs1kCvTY2F8fkNzluOl7viyrEIsIfZ1R/0STTUF42y6/yzX63H55Liw6XScXnVQ==
   dependencies:
     "@supabase/supabase-js" "^2.11.0"
 

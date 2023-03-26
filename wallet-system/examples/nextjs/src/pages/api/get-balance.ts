@@ -10,7 +10,6 @@ const db = createClient(
 
 const system = new AccountsSystem({
   db,
-  product_id: `price_1MnjFhDfxj6lEmZek1ukTPFT`,
   fetchExternalObject: async () => {},
 });
 

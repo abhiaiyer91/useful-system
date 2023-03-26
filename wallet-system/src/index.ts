@@ -10,20 +10,16 @@ type FetchExternalObj = ({
 
 export class AccountsSystem {
   db: SupabaseClient;
-  product_id: string;
   fetchExternalObject: FetchExternalObj;
   constructor({
     db,
-    product_id,
     fetchExternalObject,
   }: {
     db: SupabaseClient;
-    product_id: string;
     fetchExternalObject: FetchExternalObj;
   }) {
     this.db = db;
     this.fetchExternalObject = fetchExternalObject;
-    this.product_id = product_id;
   }
 
   async openWallet(user_id: string) {
@@ -209,6 +205,9 @@ export class AccountsSystem {
           id: string;
           price: {
             id: string;
+            metadata: {
+              tokens: string;
+            };
           };
           quantity: number;
         }[];
@@ -221,11 +220,10 @@ export class AccountsSystem {
 
     const balanceAdjustment = checkout_obj.line_items?.data
       .filter((result) => {
-        console.log(result);
-        return result.price.id === this.product_id;
+        return result.price.metadata.tokens;
       })
-      .map(({ quantity }) => {
-        return quantity;
+      .map(({ quantity, price }) => {
+        return quantity * parseInt(price.metadata.tokens, 10);
       })
       .reduce((partialSum, a) => partialSum + a, 0);
 

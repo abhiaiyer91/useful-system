@@ -9,8 +9,6 @@ const stripe = require("stripe")(
 
 const YOUR_DOMAIN = "http://localhost:3000";
 
-
-
 const db = createClient(
   "https://tsiddebqgokuesfocrti.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzaWRkZWJxZ29rdWVzZm9jcnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyNjI5MTAsImV4cCI6MTk5NDgzODkxMH0.OKEN7AXSxGvwNqebuPq9mE5XFAq574iOm9Aqm_ytcx0"
@@ -18,7 +16,6 @@ const db = createClient(
 
 const system = new AccountsSystem({
   db,
-  product_id: `price_1MnjFhDfxj6lEmZek1ukTPFT`,
   fetchExternalObject: async () => {},
 });
 

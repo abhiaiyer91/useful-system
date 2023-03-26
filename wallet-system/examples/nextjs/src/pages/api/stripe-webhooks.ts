@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { AccountsSystem } from "useful-wallet-system";
+import { AccountsSystem } from "../../../../../dist";
 
 const stripe = require("stripe")(
   "sk_test_51MnjF3Dfxj6lEmZePwkoHrG49im7rfXi9XoEdzCEHshV3sXWMucJdep30ODed0yWCVPbaoOY2qeYRGXG7qGD9XTo00bnd2ZW71"
@@ -12,14 +12,11 @@ const db = createClient(
 
 const system = new AccountsSystem({
   db,
-  product_id: `price_1MnjFhDfxj6lEmZek1ukTPFT`,
   fetchExternalObject: async ({ type, external_id }) => {
     if (type === `STRIPE_CHECKOUT_SESSION`) {
       const session = await stripe.checkout.sessions.retrieve(external_id, {
         expand: ["line_items"],
       });
-
-      console.log(session);
 
       return session;
     }
@@ -27,8 +24,6 @@ const system = new AccountsSystem({
 });
 
 export default async function handler(req, res) {
-  console.log(req.body);
-
   if (req.body.type === `checkout.session.completed`) {
     const externalId = req.body.data.object.id;
 

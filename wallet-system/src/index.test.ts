@@ -9,7 +9,6 @@ const supabase = createClient(
 
 const system = new AccountsSystem({
   db: supabase,
-  product_id: `test`,
   fetchExternalObject: ({ type, external_id }) => {
     if (type === `STRIPE_CHECKOUT_SESSION`) {
       return {
