@@ -96,12 +96,21 @@ export class AccountsSystem {
     return data?.[0];
   }
 
-  async getTransactions({ user_id }: { user_id: string }) {
+  async getTransactions({
+    user_id,
+    start = 0,
+    pageSize = 25,
+  }: {
+    user_id: string;
+    start?: number;
+    pageSize?: number;
+  }) {
     const { data, error } = await this.db
       .from(`transactions`)
       .select("*")
       .eq("user_id", user_id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(start, start + (pageSize - 1));
 
     if (error) {
       throw error;
