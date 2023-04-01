@@ -21,6 +21,7 @@
     "react-dom": "18.2.0",
     "stripe": "^11.15.0",
     "typescript": "5.0.2",
+    "useful-permissions-system": "^0.0.2",
     "useful-wallet-system": "^0.0.2"
   }
 }

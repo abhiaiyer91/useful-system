@@ -10,6 +10,8 @@ const supabase = createClient(
 const system = new NotificationSystem({
   db: supabase,
   debug: true,
+  fromEmail: `abhi@aiyer.com`,
+  fromSms: `555555555`,
 });
 
 const USER_ID = `USER_ID`;
@@ -22,21 +24,19 @@ describe("NotificationSystem", () => {
   it("Upsert NotificationSetting", async () => {
     const notifSetting = await system.upsertNotificationSettings({
       user_id: USER_ID,
-      preference: `email`,
-      enabled: true,
+      preference: { email: `abhi@abhi.com` },
     });
 
     expect(notifSetting.user_id).toBe(USER_ID);
   });
 
   it("Update NotificationSetting", async () => {
-    const notifSetting = await system.upsertNotificationSettings({
+    const notifSetting = await system.removeNotificationSettings({
       user_id: USER_ID,
-      preference: `email`,
-      enabled: false,
+      preference: `email`
     });
 
-    expect(notifSetting.email).toBe(false);
+    expect(notifSetting.email).toBe(null);
   });
 
   it("sendNotificationToUser", async () => {
@@ -45,24 +45,18 @@ describe("NotificationSystem", () => {
 
     await system.upsertNotificationSettings({
       user_id: USER_ID,
-      preference: `email`,
-      enabled: true,
+      preference: { email: `abhi@abhi.com` },
     });
 
     await system.upsertNotificationSettings({
       user_id: USER_ID,
-      preference: `sms`,
-      enabled: true,
+      preference: { email: `abhi@abhi.com`, sms: `555555555` },
     });
 
     await system.sendNotificationToUser({
       user_id: USER_ID,
       message: {
         text: `Hi`,
-        to_email: `foo@foo.com`,
-        to_sms: `555-555-5555`,
-        from_sms: `555-555-5555`,
-        from_email: `hello@gmail.com`,
         subject: `Suh`,
         html: ``,
       },
@@ -78,24 +72,14 @@ describe("NotificationSystem", () => {
 
     await system.upsertNotificationSettings({
       user_id: USER_ID,
-      preference: `email`,
-      enabled: true,
-    });
-
-    await system.upsertNotificationSettings({
-      user_id: USER_ID,
-      preference: `sms`,
-      enabled: true,
+      preference: { email: `abhi@abhi.com`, sms: `555555555` },
     });
 
     await system.sendNotificationToUsers({
       user_ids: [USER_ID],
       message: {
         text: `Hi`,
-        to_email: `foo@foo.com`,
-        to_sms: `555-555-5555`,
-        from_sms: `555-555-5555`,
-        from_email: `hello@gmail.com`,
+      
         subject: `Suh`,
         html: ``,
       },
