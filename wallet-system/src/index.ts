@@ -260,6 +260,14 @@ export class AccountsSystem {
           break;
         }
 
+        case "GRANT_BALANCE": {
+          await this.adjustBalance({
+            user_id: transaction.user_id,
+            balance: transaction.balance,
+            method: `add`,
+          });
+          break;
+        }
         case "SPEND_BALANCE": {
           await this.adjustBalance({
             user_id: transaction.user_id,
@@ -284,5 +292,27 @@ export class AccountsSystem {
         status: `FAILED`,
       });
     }
+  }
+
+  async grantTokens({
+    user_id,
+    tokenCount,
+  }: {
+    user_id: string;
+    tokenCount: number;
+  }) {
+    let tx = await this.createTransaction({
+      user_id,
+      description: `Received ${tokenCount} tokens.`,
+      type: `GRANT_BALANCE`,
+      balance: tokenCount,
+      externalId: user_id,
+    });
+
+    await this.resolveTransaction({
+      transaction_id: tx.id,
+    });
+
+    return tx.id;
   }
 }

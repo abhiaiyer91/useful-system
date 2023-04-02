@@ -13,12 +13,20 @@ const system = new AccountsSystem({
     if (type === `STRIPE_CHECKOUT_SESSION`) {
       return {
         id: external_id,
-        line_items: [
-          {
-            id: `test`,
-            quantity: 100,
-          },
-        ],
+        line_items: {
+          data: [
+            {
+              id: `test`,
+              quantity: 100,
+              price: {
+                id: `id`,
+                metadata: {
+                  tokens: `1`,
+                },
+              },
+            },
+          ],
+        },
       };
     }
 
@@ -130,6 +138,20 @@ describe("AccountSystem", () => {
     let wallet = await system.getWallet(USER_ID);
 
     expect(wallet.balance).toBe(105);
+
+    expect(tx.status).toBe(`COMPLETE`);
+  });
+
+  it("grant balance", async () => {
+    const txId = await system.grantTokens({ user_id: USER_ID, tokenCount: 10 });
+
+    const tx = await system.getTransactionById({
+      transaction_id: txId,
+    });
+
+    let wallet = await system.getWallet(USER_ID);
+
+    expect(wallet.balance).toBe(115);
 
     expect(tx.status).toBe(`COMPLETE`);
   });
