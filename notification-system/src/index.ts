@@ -2,9 +2,6 @@ import SendGridMail, { MailService } from "@sendgrid/mail";
 import { SupabaseClient } from "@supabase/supabase-js";
 import TwilioSDK from "twilio";
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-
 interface Message {
   subject: string;
   text: string;
@@ -47,7 +44,7 @@ export class NotificationSystem {
     }
 
     if (TWILIO_AUTH_TOKEN && TWILIO_ACCOUNT_SID) {
-      this.twilio = new TwilioSDK.Twilio(accountSid, authToken);
+      this.twilio = new TwilioSDK.Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
     }
   }
 
@@ -167,7 +164,7 @@ export class NotificationSystem {
           user_id: id,
           message,
         });
-      })
+      }),
     );
   }
 
