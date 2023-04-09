@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import pMap from "p-map";
 import * as yup from "yup";
 
 // Sendgrid docs link: https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
@@ -49,13 +50,50 @@ interface Message {
 export class InboundMailer {
   db: SupabaseClient;
   debug: boolean;
-  constructor({ db, debug }: { db: SupabaseClient; debug?: boolean }) {
+  generators: Record<string, any>;
+  constructor({
+    db,
+    debug,
+    generators,
+  }: {
+    db: SupabaseClient;
+    debug?: boolean;
+    generators: Record<string, any>;
+  }) {
     this.debug = !!debug;
     this.db = db;
+    this.generators = generators;
   }
 
   getEmailUserId(email: Pick<Email, "to">) {
     return email.to.split("@")[0];
+  }
+
+  async getUsers() {
+    const { data, error } = await this.db.from("users_view").select("id");
+    return { data, error };
+  }
+
+  async processMail(generator: string) {
+    const generatorFn = this.generators[generator];
+
+    if (!generatorFn) {
+      throw new Error(`No generator found for ${generator}`);
+    }
+
+    const { data, error } = await this.getUsers();
+
+    if (error) {
+      throw new Error("Unable to process mailers");
+    }
+
+    if (!data) {
+      throw new Error("No users found");
+    }
+
+    await pMap(data, async (userId) => {
+      return generatorFn(userId);
+    });
   }
 
   async verifyUser(id: string) {
