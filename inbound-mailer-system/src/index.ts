@@ -42,6 +42,13 @@ interface Email {
   spf?: string;
 }
 
+interface AudioFeedUrl {
+  url: string;
+  user_id: string;
+  text: string;
+  status: string;
+}
+
 interface Message {
   subject: string;
   text: string;
@@ -131,8 +138,20 @@ export class InboundMailer {
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
-      .gte("created_at", subDays(new Date(), 1))
-      .lte("created_at", new Date());
+      .gte("created_at", subDays(new Date(), 1).toISOString())
+      .lte("created_at", new Date().toISOString());
+
+    return { data, error };
+  }
+
+  async getProcessedUrlsInLastDay(user_id: string) {
+    const { data, error } = await this.db
+      .from("inbound_urls")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .gte("created_at", subDays(new Date(), 1).toISOString())
+      .lte("created_at", new Date().toISOString());
 
     return { data, error };
   }
@@ -215,6 +234,14 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async insertInboundUrl(inboundUrl: AudioFeedUrl) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .insert(inboundUrl)
+      .select("*");
+    return { data, error };
+  }
+
   async validateEmailId(email_id: string) {
     const { data, error } = await this.db
       .from("emails")
@@ -254,6 +281,32 @@ export class InboundMailer {
       .update({ audio_file })
       .eq("id", email_id);
     return { data, error };
+  }
+
+  async validateAndSaveInboundUrl(metadata: AudioFeedUrl) {
+    const { data: verifyData, error: verifyError } = await this.verifyUser(
+      metadata.user_id
+    );
+
+    if (verifyError || !verifyData?.id) {
+      console.error("The User is not valid", verifyError);
+
+      // Silent return
+      return;
+    }
+
+    const { data: urlData, error: urlError } = await this.insertInboundUrl(
+      metadata
+    );
+
+    if (urlError) {
+      console.error("Unable to insert email into database", urlError);
+
+      // Silent return
+      return;
+    }
+
+    return urlData?.[0];
   }
 
   async validateAndSave(metadata: Email) {
