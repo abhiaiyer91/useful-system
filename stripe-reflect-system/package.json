@@ -1,16 +1,16 @@
 {
-  "name": "useful-inbound-mailer-system",
+  "name": "useful-stripe-reflect-system",
   "version": "0.0.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.11.0",
-    "p-map": "4.0.0",
-    "yup": "^1.0.2"
+    "stripe": "^12.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.11",
     "jest": "^29.5.0",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",

@@ -74,6 +74,45 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async verifyUser(id: string) {
+    const { data, error } = await this.db
+      .from("users_view")
+      .select("id")
+      .eq("id", id)
+      .single();
+
+    return { data, error };
+  }
+
+  async getUnprocessedEmails(user_id: string, limit = 5) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async updateEmailsAsProcessed(user_id: string, email_ids: string[]) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ status: "processed" })
+      .in("id", email_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateEmailsAsUnprocessed(user_id: string, date: string) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ status: "unprocessed" })
+      .lte("created_at", date)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
   async processMail(generator: string) {
     const generatorFn = this.generators[generator];
 
@@ -91,19 +130,39 @@ export class InboundMailer {
       throw new Error("No users found");
     }
 
-    await pMap(data, async (userId) => {
-      return generatorFn(userId);
+    await pMap(data, async ({ id }) => {
+      const { data, error } = await this.getUnprocessedEmails(id);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      if (data?.length === 0) {
+        return console.log("Abort. No emails");
+      }
+
+      let emailText = "";
+      let emailIds: string[] = [];
+      let lastEmailDate = "";
+      data?.forEach(async (email, index) => {
+        emailIds.push(email.id);
+        emailText =
+          emailText +
+          `\n\n[Email ${index + 1}]\nSubject: ${email.subject}\nFrom: ${
+            email.from
+          }\nEmail Body: ${email.text}`;
+        lastEmailDate = email.created_at;
+      });
+
+      return generatorFn({
+        userId: id,
+        emails: data,
+        lastEmailDate,
+        emailIds,
+        emailText,
+      });
     });
-  }
-
-  async verifyUser(id: string) {
-    const { data, error } = await this.db
-      .from("users_view")
-      .select("id")
-      .eq("id", id)
-      .single();
-
-    return { data, error };
   }
 
   async insertEmail(email: Email) {
