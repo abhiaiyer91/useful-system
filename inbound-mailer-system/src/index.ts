@@ -93,6 +93,22 @@ export class InboundMailer {
     return data[0];
   }
 
+  async getInboundUrlById(id: string) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .select("*")
+      .eq("id", id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
   async getUsers() {
     const { data, error } = await this.db.from("users_view").select("id");
     return { data, error };
@@ -123,6 +139,18 @@ export class InboundMailer {
   async getProcessedEmails(user_id: string, limit = 5) {
     const { data, error } = await this.db
       .from("emails")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedUrls(user_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_url")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
