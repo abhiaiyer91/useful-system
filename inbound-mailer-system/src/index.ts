@@ -69,6 +69,22 @@ export class InboundMailer {
     return email.to.split("@")[0];
   }
 
+  async getEmailById(id: string) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("id", id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
   async getUsers() {
     const { data, error } = await this.db.from("users_view").select("id");
     return { data, error };
@@ -179,7 +195,7 @@ export class InboundMailer {
   }
 
   async insertEmail(email: Email) {
-    const { data, error } = await this.db.from("emails").insert(email).select();
+    const { data, error } = await this.db.from("emails").insert(email).select('*');
     return { data, error };
   }
 
