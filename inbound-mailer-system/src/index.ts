@@ -170,13 +170,54 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async validateEmailId(email_id: string) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("id")
+      .eq("id", email_id);
+
+    if (error) {
+      return false;
+    }
+
+    return !!data;
+  }
+
+  async updateEmailWithSummary({
+    email_id,
+    summary,
+  }: {
+    email_id: string;
+    summary: string;
+  }) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ summary })
+      .eq("id", email_id);
+    return { data, error };
+  }
+
+  async updateEmailWithAudio({
+    email_id,
+    audio_file,
+  }: {
+    email_id: string;
+    audio_file: string;
+  }) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ audio_file })
+      .eq("id", email_id);
+    return { data, error };
+  }
+
   async validateAndSave(metadata: Email) {
     const email = await EMAIL_SCHEMA.validate(metadata);
 
     const userId = this.getEmailUserId(email);
 
     const { data: verifyData, error: verifyError } = await this.verifyUser(
-      userId,
+      userId
     );
 
     if (verifyError || !verifyData?.id) {
