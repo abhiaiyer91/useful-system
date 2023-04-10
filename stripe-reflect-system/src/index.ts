@@ -19,6 +19,15 @@ export class StripeReflection {
     this.stripe = stripe;
   }
 
+  async getSubscriptionByUserId(userId: string) {
+    const { data, error } = await this.db
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", userId);
+
+    return { data, error };
+  }
+
   async upsertProductRecord(product: Stripe.Product) {
     const { error } = await this.db.from("products").upsert({
       id: product.id,
