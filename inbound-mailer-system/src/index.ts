@@ -113,7 +113,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async processMail(generator: string) {
+  async processMail(generator: string, content_column: string = "text") {
     const generatorFn = this.generators[generator];
 
     if (!generatorFn) {
@@ -151,7 +151,7 @@ export class InboundMailer {
           emailText +
           `\n\n[Email ${index + 1}]\nSubject: ${email.subject}\nFrom: ${
             email.from
-          }\nEmail Body: ${email.text}`;
+          }\nEmail Body: ${email[content_column]}`;
         lastEmailDate = email.created_at;
       });
 
@@ -176,7 +176,7 @@ export class InboundMailer {
     const userId = this.getEmailUserId(email);
 
     const { data: verifyData, error: verifyError } = await this.verifyUser(
-      userId
+      userId,
     );
 
     if (verifyError || !verifyData?.id) {
