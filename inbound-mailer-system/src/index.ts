@@ -89,6 +89,19 @@ export class InboundMailer {
       .from("emails")
       .select("*")
       .eq("user_id", user_id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedEmails(user_id: string, limit = 5) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
       .order("created_at", { ascending: false })
       .limit(limit);
 
