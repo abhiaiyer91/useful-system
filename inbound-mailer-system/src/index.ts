@@ -166,7 +166,7 @@ export class InboundMailer {
   }
 
   async insertEmail(email: Email) {
-    const { data, error } = await this.db.from("emails").insert(email);
+    const { data, error } = await this.db.from("emails").insert(email).select();
     return { data, error };
   }
 
