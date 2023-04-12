@@ -55,12 +55,6 @@ interface AudioFeedText {
   status: string;
 }
 
-interface Message {
-  subject: string;
-  text: string;
-  html: string;
-}
-
 export class InboundMailer {
   db: SupabaseClient;
   debug: boolean;
@@ -83,12 +77,49 @@ export class InboundMailer {
     return email.to.split("@")[0];
   }
 
+  async getFeedsByUserId(userId: string) {
+    const { data, error } = await this.db
+      .from("feeds")
+      .select("*")
+      .eq("userId", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  async getFeedsById(id: string) {
+    const { data, error } = await this.db
+      .from("feeds")
+      .select("*")
+      .eq("id", id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
+  async updateFeed(id: string, update: any) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update(update)
+      .eq("id", id);
+
+    return { data, error };
+  }
+
   async getEmailById(id: string) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
       .eq("id", id)
-      .neq("status", "processed")
       .order("created_at", { ascending: false })
       .limit(1);
 
@@ -104,7 +135,6 @@ export class InboundMailer {
       .from("inbound_url")
       .select("*")
       .eq("id", id)
-      .neq("status", "processed")
       .order("created_at", { ascending: false })
       .limit(1);
 
@@ -120,7 +150,6 @@ export class InboundMailer {
       .from("inbound_text")
       .select("*")
       .eq("id", id)
-      .neq("status", "processed")
       .order("created_at", { ascending: false })
       .limit(1);
 
@@ -349,6 +378,19 @@ export class InboundMailer {
       .insert(inboundUrl)
       .select("*");
     return { data, error };
+  }
+
+  async validateFeedId(feed_id: string) {
+    const { data, error } = await this.db
+      .from("feeds")
+      .select("id")
+      .eq("id", feed_id);
+
+    if (error) {
+      return false;
+    }
+
+    return !!data;
   }
 
   async validateEmailId(email_id: string) {
