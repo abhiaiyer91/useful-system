@@ -435,9 +435,11 @@ export class InboundMailer {
   async updateEmailWithSummary({
     email_id,
     summary,
+    category,
   }: {
     email_id: string;
     summary: string;
+    category: string;
   }) {
     const { data, error } = await this.db
       .from("emails")
@@ -449,9 +451,11 @@ export class InboundMailer {
   async updateInboundUrlWithSummary({
     url_id,
     summary,
+    category,
   }: {
     url_id: string;
     summary: string;
+    category: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_url")
@@ -463,9 +467,11 @@ export class InboundMailer {
   async updateInboundTextWithSummary({
     text_id,
     summary,
+    category,
   }: {
     text_id: string;
     summary: string;
+    category: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_text")
