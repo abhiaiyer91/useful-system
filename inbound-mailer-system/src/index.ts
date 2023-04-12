@@ -81,7 +81,7 @@ export class InboundMailer {
     const { data, error } = await this.db
       .from("feeds")
       .select("*")
-      .eq("userId", userId)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
