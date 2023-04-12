@@ -49,6 +49,12 @@ interface AudioFeedUrl {
   status: string;
 }
 
+interface AudioFeedText {
+  user_id: string;
+  text: string;
+  status: string;
+}
+
 interface Message {
   subject: string;
   text: string;
@@ -96,6 +102,22 @@ export class InboundMailer {
   async getInboundUrlById(id: string) {
     const { data, error } = await this.db
       .from("inbound_url")
+      .select("*")
+      .eq("id", id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
+  async getInboundTextById(id: string) {
+    const { data, error } = await this.db
+      .from("inbound_text")
       .select("*")
       .eq("id", id)
       .neq("status", "processed")
@@ -160,6 +182,18 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async getProcessedText(user_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
   async getProcessedEmailsInLastDay(user_id: string) {
     const { data, error } = await this.db
       .from("emails")
@@ -175,6 +209,18 @@ export class InboundMailer {
   async getProcessedUrlsInLastDay(user_id: string) {
     const { data, error } = await this.db
       .from("inbound_urls")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .gte("created_at", subDays(new Date(), 1).toISOString())
+      .lte("created_at", new Date().toISOString());
+
+    return { data, error };
+  }
+
+  async getProcessedTextInLastDay(user_id: string) {
+    const { data, error } = await this.db
+      .from("inbound_text")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
@@ -202,11 +248,29 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async updateInboundTextAsProcessed(user_id: string, url_ids: string[]) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ status: "processed" })
+      .in("id", url_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
   async updateEmailsAsUnprocessed(user_id: string, date: string) {
     const { data, error } = await this.db
       .from("emails")
       .update({ status: "unprocessed" })
       .lte("created_at", date)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateInboundTextAsUnprocessed(user_id: string, text_ids: string[]) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ status: "unprocessed" })
+      .in("id", text_ids)
       .eq("user_id", user_id);
     return { data, error };
   }
@@ -279,6 +343,14 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async insertInboundText(inboundUrl: AudioFeedText) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .insert(inboundUrl)
+      .select("*");
+    return { data, error };
+  }
+
   async validateEmailId(email_id: string) {
     const { data, error } = await this.db
       .from("emails")
@@ -295,6 +367,19 @@ export class InboundMailer {
   async validateInboundUrlId(url_id: string) {
     const { data, error } = await this.db
       .from("inbound_url")
+      .select("id")
+      .eq("id", url_id);
+
+    if (error) {
+      return false;
+    }
+
+    return !!data;
+  }
+
+  async validateInboundTextId(url_id: string) {
+    const { data, error } = await this.db
+      .from("inbound_text")
       .select("id")
       .eq("id", url_id);
 
@@ -333,6 +418,20 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async updateInboundTextWithSummary({
+    text_id,
+    summary,
+  }: {
+    text_id: string;
+    summary: string;
+  }) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ summary })
+      .eq("id", text_id);
+    return { data, error };
+  }
+
   async updateEmailWithAudio({
     email_id,
     audio_file,
@@ -359,6 +458,46 @@ export class InboundMailer {
       .update({ audio_file })
       .eq("id", url_id);
     return { data, error };
+  }
+
+  async updateInboundTextWithAudio({
+    text_id,
+    audio_file,
+  }: {
+    text_id: string;
+    audio_file: string;
+  }) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ audio_file })
+      .eq("id", text_id);
+    return { data, error };
+  }
+
+  async validateAndSaveInboundText(metadata: AudioFeedText) {
+    const { data: verifyData, error: verifyError } = await this.verifyUser(
+      metadata.user_id
+    );
+
+    if (verifyError || !verifyData?.id) {
+      console.error("The User is not valid", verifyError);
+
+      // Silent return
+      return;
+    }
+
+    const { data: urlData, error: urlError } = await this.insertInboundText(
+      metadata
+    );
+
+    if (urlError) {
+      console.error("Unable to insert text into database", urlError);
+
+      // Silent return
+      return;
+    }
+
+    return urlData?.[0];
   }
 
   async validateAndSaveInboundUrl(metadata: AudioFeedUrl) {
