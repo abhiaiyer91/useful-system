@@ -435,13 +435,15 @@ export class InboundMailer {
   async updateEmailWithAudio({
     email_id,
     audio_file,
+    output_type = `summarize`,
   }: {
     email_id: string;
     audio_file: string;
+    output_type: string;
   }) {
     const { data, error } = await this.db
       .from("emails")
-      .update({ audio_file })
+      .update({ audio_file, output_type })
       .eq("id", email_id);
     return { data, error };
   }
@@ -449,13 +451,15 @@ export class InboundMailer {
   async updateInboundUrlWithAudio({
     url_id,
     audio_file,
+    output_type = `summarize`,
   }: {
     url_id: string;
+    output_type: string;
     audio_file: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_url")
-      .update({ audio_file })
+      .update({ audio_file, output_type })
       .eq("id", url_id);
     return { data, error };
   }
@@ -463,13 +467,15 @@ export class InboundMailer {
   async updateInboundTextWithAudio({
     text_id,
     audio_file,
+    output_type = `summarize`,
   }: {
     text_id: string;
+    output_type: string;
     audio_file: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_text")
-      .update({ audio_file })
+      .update({ audio_file, output_type })
       .eq("id", text_id);
     return { data, error };
   }
