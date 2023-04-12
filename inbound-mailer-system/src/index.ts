@@ -45,7 +45,7 @@ interface Email {
 
 interface AudioFeedUrl {
   url: string;
-  feed_id: string
+  feed_id: string;
   user_id: string;
   text: string;
   status: string;
@@ -53,7 +53,7 @@ interface AudioFeedUrl {
 
 interface AudioFeedText {
   user_id: string;
-  feed_id: string
+  feed_id: string;
   text: string;
   status: string;
 }
@@ -184,6 +184,42 @@ export class InboundMailer {
       .select("*")
       .eq("user_id", user_id)
       .neq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedEmailsByFeedId(feed_id: string, limit = 5) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedUrlsByFeedId(feed_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedTextByFeedId(feed_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "processed")
       .order("created_at", { ascending: false })
       .limit(limit);
 
