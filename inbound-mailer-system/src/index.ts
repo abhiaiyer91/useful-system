@@ -25,6 +25,7 @@ const EMAIL_SCHEMA = yup.object().shape({
 
 interface Email {
   to: string;
+  feed_id: string;
   user_id: string;
   from: string;
   headers: string;
@@ -44,6 +45,7 @@ interface Email {
 
 interface AudioFeedUrl {
   url: string;
+  feed_id: string
   user_id: string;
   text: string;
   status: string;
@@ -51,6 +53,7 @@ interface AudioFeedUrl {
 
 interface AudioFeedText {
   user_id: string;
+  feed_id: string
   text: string;
   status: string;
 }
@@ -583,10 +586,12 @@ export class InboundMailer {
   async validateAndSave(metadata: Email) {
     const email = await EMAIL_SCHEMA.validate(metadata);
 
-    const userId = this.getEmailUserId(email);
+    const feedId = this.getEmailUserId(email);
+
+    const feed = await this.getFeedsById(feedId);
 
     const { data: verifyData, error: verifyError } = await this.verifyUser(
-      userId
+      feed.user_id
     );
 
     if (verifyError || !verifyData?.id) {
@@ -598,6 +603,7 @@ export class InboundMailer {
 
     const { data: emailData, error: emailError } = await this.insertEmail({
       user_id: verifyData.id,
+      feed_id: feedId,
       to: email.to,
       from: email.from,
       headers: email.headers,
