@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import pMap from "p-map";
-import { subDays } from "date-fns";
+import { startOfMonth, subDays } from "date-fns";
 import * as yup from "yup";
 
 // Sendgrid docs link: https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
@@ -262,6 +262,36 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async getProcessedJobsCountInLastMonth(user_id: string) {
+    const total = [];
+
+    const emails = await this.getProcessedEmailsInLastMonth(user_id);
+
+    total.push(emails?.data);
+
+    const text = await this.getProcessedTextInLastMonth(user_id);
+
+    total.push(text?.data);
+
+    const url = await this.getProcessedUrlsInLastMonth(user_id);
+
+    total.push(url?.data);
+
+    return total?.length; 
+  }
+
+  async getProcessedEmailsInLastMonth(user_id: string) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .gte("created_at", startOfMonth(new Date()).toISOString())
+      .lte("created_at", new Date().toISOString());
+
+    return { data, error };
+  }
+
   async getProcessedEmailsInLastDay(user_id: string) {
     const { data, error } = await this.db
       .from("emails")
@@ -286,6 +316,18 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async getProcessedUrlsInLastMonth(user_id: string) {
+    const { data, error } = await this.db
+      .from("inbound_urls")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .gte("created_at", startOfMonth(new Date()).toISOString())
+      .lte("created_at", new Date().toISOString());
+
+    return { data, error };
+  }
+
   async getProcessedTextInLastDay(user_id: string) {
     const { data, error } = await this.db
       .from("inbound_text")
@@ -293,6 +335,18 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", subDays(new Date(), 1).toISOString())
+      .lte("created_at", new Date().toISOString());
+
+    return { data, error };
+  }
+
+  async getProcessedTextInLastMonth(user_id: string) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "processed")
+      .gte("created_at", startOfMonth(new Date()).toISOString())
       .lte("created_at", new Date().toISOString());
 
     return { data, error };
