@@ -111,7 +111,7 @@ export class InboundMailer {
 
   async updateFeed(id: string, update: any) {
     const { data, error } = await this.db
-      .from("emails")
+      .from("feeds")
       .update(update)
       .eq("id", id);
 
@@ -277,7 +277,7 @@ export class InboundMailer {
 
     total.push(url?.data);
 
-    return total?.length; 
+    return total?.length;
   }
 
   async getProcessedEmailsInLastMonth(user_id: string) {
