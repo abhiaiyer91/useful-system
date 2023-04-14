@@ -536,7 +536,7 @@ export class InboundMailer {
   }) {
     const { data, error } = await this.db
       .from("emails")
-      .update({ summary })
+      .update({ summary, category })
       .eq("id", email_id);
     return { data, error };
   }
@@ -545,14 +545,16 @@ export class InboundMailer {
     url_id,
     summary,
     category,
+    title,
   }: {
+    title: string;
     url_id: string;
     summary: string;
     category: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_url")
-      .update({ summary })
+      .update({ title, summary, category })
       .eq("id", url_id);
     return { data, error };
   }
@@ -561,14 +563,16 @@ export class InboundMailer {
     text_id,
     summary,
     category,
+    title,
   }: {
     text_id: string;
     summary: string;
     category: string;
+    title: string;
   }) {
     const { data, error } = await this.db
       .from("inbound_text")
-      .update({ summary })
+      .update({ title, summary, category })
       .eq("id", text_id);
     return { data, error };
   }
