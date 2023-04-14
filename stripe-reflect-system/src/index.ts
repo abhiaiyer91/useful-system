@@ -25,7 +25,17 @@ export class StripeReflection {
       .select("*")
       .eq("user_id", userId);
 
-    return { data, error };
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const sub = data?.[0];
+
+    const priceId = sub?.price_id;
+
+    const price = await this.getPriceRecord(priceId);
+
+    return { sub, price };
   }
 
   async upsertProductRecord(product: Stripe.Product) {
@@ -71,6 +81,19 @@ export class StripeReflection {
         `Error occurred while deleting the prices for product: ${priceDeleteError.message}`
       );
     }
+  }
+
+  async getPriceRecord(priceId: string) {
+    const { data, error } = await this.db
+      .from("prices")
+      .select()
+      .eq("id", priceId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data?.[0];
   }
 
   async upsertPriceRecord(price: Stripe.Price) {
