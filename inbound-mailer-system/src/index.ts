@@ -529,14 +529,16 @@ export class InboundMailer {
     email_id,
     summary,
     category,
+    title,
   }: {
+    title: string;
     email_id: string;
     summary: string;
     category: string;
   }) {
     const { data, error } = await this.db
       .from("emails")
-      .update({ summary, category })
+      .update({ summary, category, title })
       .eq("id", email_id);
     return { data, error };
   }
