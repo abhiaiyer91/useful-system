@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import pMap from "p-map";
+import { orderBy } from "lodash";
 import { startOfMonth, subDays } from "date-fns";
 import * as yup from "yup";
 
@@ -188,6 +189,49 @@ export class InboundMailer {
       .limit(limit);
 
     return { data, error };
+  }
+
+  async getUnprocessedJobsByFeedId(feed_id: string) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const { data: urlData, error: urlError } = await this.db
+      .from("inbound_url")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false });
+
+    if (urlError) {
+      throw new Error(urlError.message);
+    }
+
+    const { data: textData, error: textError } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .neq("status", "processed")
+      .order("created_at", { ascending: false });
+
+    if (textError) {
+      throw new Error(textError.message);
+    }
+
+    const items = orderBy(
+      [...data, ...urlData, ...textData],
+      "created_at",
+      "desc"
+    );
+
+    return items;
   }
 
   async getProcessedEmailsByFeedId(feed_id: string, limit = 5) {
