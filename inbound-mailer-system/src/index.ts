@@ -432,11 +432,29 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async updateEmailsAsUnprocessedByIds(user_id: string, email_ids: string[]) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ status: "unprocessed" })
+      .in("id", email_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
   async updateInboundTextAsUnprocessed(user_id: string, text_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_text")
       .update({ status: "unprocessed" })
       .in("id", text_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateInboundUrlsAsUnprocessed(user_id: string, url_ids: string[]) {
+    const { data, error } = await this.db
+      .from("inbound_urls")
+      .update({ status: "unprocessed" })
+      .in("id", url_ids)
       .eq("user_id", user_id);
     return { data, error };
   }
