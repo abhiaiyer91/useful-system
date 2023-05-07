@@ -197,6 +197,7 @@ export class InboundMailer {
       .select("*")
       .eq("feed_id", feed_id)
       .neq("status", "processed")
+      .neq("status", "cancelled")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -432,28 +433,28 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async updateEmailsAsUnprocessedByIds(user_id: string, email_ids: string[]) {
+  async updateEmailsAsCancelled(user_id: string, email_ids: string[]) {
     const { data, error } = await this.db
       .from("emails")
-      .update({ status: "unprocessed" })
+      .update({ status: "cancelled" })
       .in("id", email_ids)
       .eq("user_id", user_id);
     return { data, error };
   }
 
-  async updateInboundTextAsUnprocessed(user_id: string, text_ids: string[]) {
+  async updateInboundTextAsCancelled(user_id: string, text_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_text")
-      .update({ status: "unprocessed" })
+      .update({ status: "cancelled" })
       .in("id", text_ids)
       .eq("user_id", user_id);
     return { data, error };
   }
 
-  async updateInboundUrlsAsUnprocessed(user_id: string, url_ids: string[]) {
+  async updateInboundUrlsAsCancelled(user_id: string, url_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_urls")
-      .update({ status: "unprocessed" })
+      .update({ status: "cancelled" })
       .in("id", url_ids)
       .eq("user_id", user_id);
     return { data, error };
