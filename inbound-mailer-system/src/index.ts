@@ -209,6 +209,7 @@ export class InboundMailer {
       .select("*")
       .eq("feed_id", feed_id)
       .neq("status", "processed")
+      .neq("status", "cancelled")
       .order("created_at", { ascending: false });
 
     if (urlError) {
@@ -220,6 +221,7 @@ export class InboundMailer {
       .select("*")
       .eq("feed_id", feed_id)
       .neq("status", "processed")
+      .neq("status", "cancelled")
       .order("created_at", { ascending: false });
 
     if (textError) {
