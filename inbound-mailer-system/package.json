@@ -1,6 +1,6 @@
 {
   "name": "useful-inbound-mailer-system",
-  "version": "0.0.26",
+  "version": "0.0.28",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",

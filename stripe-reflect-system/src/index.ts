@@ -96,6 +96,19 @@ export class StripeReflection {
     return data?.[0];
   }
 
+  async getPrices() {
+    const { data, error } = await this.db
+      .from("prices")
+      .select()
+      .eq("active", true);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
   async upsertPriceRecord(price: Stripe.Price) {
     const { error } = await this.db.from("prices").upsert({
       id: price.id,
