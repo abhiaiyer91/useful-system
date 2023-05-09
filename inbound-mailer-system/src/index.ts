@@ -461,7 +461,7 @@ export class InboundMailer {
 
   async updateInboundUrlsAsCancelled(user_id: string, url_ids: string[]) {
     const { data, error } = await this.db
-      .from("inbound_urls")
+      .from("inbound_url")
       .update({ status: "cancelled" })
       .in("id", url_ids)
       .eq("user_id", user_id);
