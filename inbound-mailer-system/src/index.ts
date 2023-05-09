@@ -316,19 +316,19 @@ export class InboundMailer {
   }
 
   async getProcessedJobsCountInLastMonth(user_id: string) {
-    const total = [];
+    let total: any = [];
 
     const emails = await this.getProcessedEmailsInLastMonth(user_id);
 
-    total.push(emails?.data);
+    total = total.concat(emails?.data || []);
 
     const text = await this.getProcessedTextInLastMonth(user_id);
 
-    total.push(text?.data);
+    total = total.concat(text?.data || []);
 
     const url = await this.getProcessedUrlsInLastMonth(user_id);
 
-    total.push(url?.data);
+    total = total.concat(url?.data || []);
 
     return total?.length;
   }
