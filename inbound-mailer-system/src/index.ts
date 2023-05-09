@@ -78,7 +78,13 @@ export class InboundMailer {
   }
 
   getEmailUserId(email: Pick<Email, "to">) {
-    return email.to.split("@")[0];
+    const emailRegex =
+      /(?:[<"])?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[">]?/;
+    const match = email.to.match(emailRegex);
+    if (match) {
+      return match[1].split("@")[0];
+    }
+    return null;
   }
 
   async getFeedsByUserId(userId: string) {
@@ -748,6 +754,13 @@ export class InboundMailer {
     const email = await EMAIL_SCHEMA.validate(metadata);
 
     const feedId = this.getEmailUserId(email);
+
+    if (!feedId) {
+      console.error(`The Email ${email?.to} is not valid`);
+
+      // Silent return
+      return;
+    }
 
     const feed = await this.getFeedsById(feedId);
 
