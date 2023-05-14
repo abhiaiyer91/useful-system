@@ -116,7 +116,7 @@ export class InboundMailer {
     return data[0];
   }
 
-  async getFeedsByPath(path: string) {
+  async getPublicFeedsByPath(path: string) {
     const { data, error } = await this.db
       .from("feeds")
       .select("*")
