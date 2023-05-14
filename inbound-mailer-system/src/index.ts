@@ -116,6 +116,21 @@ export class InboundMailer {
     return data[0];
   }
 
+  async getPublicFeedsByPath(path: string) {
+    const { data, error } = await this.db
+      .from("feeds")
+      .select("*")
+      .eq("path", path)
+      .eq("private", false)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
   async updateFeed(id: string, update: any) {
     const { data, error } = await this.db
       .from("feeds")
