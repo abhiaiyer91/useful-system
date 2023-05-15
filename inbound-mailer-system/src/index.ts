@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import pMap from "p-map";
 import { orderBy } from "lodash";
-import { startOfMonth, subDays } from "date-fns";
+import { addDays, formatISO, subDays } from "date-fns";
 import * as yup from "yup";
 
 // Sendgrid docs link: https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
@@ -330,32 +330,52 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedJobsCountInLastMonth(user_id: string) {
+  async getProcessedJobsCountInLastMonth(
+    user_id: string,
+    current_period_start: Date, 
+    current_period_end: Date
+  ) {
     let total: any = [];
 
-    const emails = await this.getProcessedEmailsInLastMonth(user_id);
+    const emails = await this.getProcessedEmailsInLastMonth(
+      user_id,
+      current_period_start,
+      current_period_end
+    );
 
     total = total.concat(emails?.data || []);
 
-    const text = await this.getProcessedTextInLastMonth(user_id);
+    const text = await this.getProcessedTextInLastMonth(
+      user_id,
+      current_period_start,
+      current_period_end
+    );
 
     total = total.concat(text?.data || []);
 
-    const url = await this.getProcessedUrlsInLastMonth(user_id);
+    const url = await this.getProcessedUrlsInLastMonth(
+      user_id,
+      current_period_start,
+      current_period_end
+    );
 
     total = total.concat(url?.data || []);
 
     return total?.length;
   }
 
-  async getProcessedEmailsInLastMonth(user_id: string) {
+  async getProcessedEmailsInLastMonth(
+    user_id: string,
+    current_period_start: Date,
+    current_period_end: Date
+  ) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
-      .gte("created_at", startOfMonth(new Date()).toISOString())
-      .lte("created_at", new Date().toISOString());
+      .gte("created_at", formatISO(current_period_start))
+      .lte("created_at", formatISO(current_period_end))
 
     return { data, error };
   }
@@ -384,14 +404,18 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedUrlsInLastMonth(user_id: string) {
+  async getProcessedUrlsInLastMonth(
+    user_id: string,
+    current_period_start: Date,
+    current_period_end: Date
+  ) {
     const { data, error } = await this.db
       .from("inbound_urls")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
-      .gte("created_at", startOfMonth(new Date()).toISOString())
-      .lte("created_at", new Date().toISOString());
+      .gte("created_at", formatISO(current_period_start))
+      .lte("created_at", formatISO(current_period_end))
 
     return { data, error };
   }
@@ -408,14 +432,18 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedTextInLastMonth(user_id: string) {
+  async getProcessedTextInLastMonth(
+    user_id: string,
+    current_period_start: Date,
+    current_period_end: Date
+  ) {
     const { data, error } = await this.db
       .from("inbound_text")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
-      .gte("created_at", startOfMonth(new Date()).toISOString())
-      .lte("created_at", new Date().toISOString());
+      .gte("created_at", formatISO(current_period_start))
+      .lte("created_at", formatISO(current_period_end))
 
     return { data, error };
   }
