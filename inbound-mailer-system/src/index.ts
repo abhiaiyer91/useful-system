@@ -154,6 +154,20 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async getEpisodeById(id: string) {
+    const { data, error } = await this.db
+      .from("episodes")
+      .select("*")
+      .eq("id", id)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
   async getEmailById(id: string) {
     const { data, error } = await this.db
       .from("emails")
@@ -346,7 +360,7 @@ export class InboundMailer {
 
   async getProcessedJobsCountInLastMonth(
     user_id: string,
-    current_period_start: Date, 
+    current_period_start: Date,
     current_period_end: Date
   ) {
     let total: any = [];
@@ -389,7 +403,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
@@ -429,7 +443,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
@@ -457,7 +471,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
