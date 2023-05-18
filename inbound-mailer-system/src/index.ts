@@ -131,6 +131,20 @@ export class InboundMailer {
     return data[0];
   }
 
+  async isFeedPathAvailable(path: string) {
+    const { data, error } = await this.db
+      .from("feeds")
+      .select("id")
+      .eq("path", path)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return !data.length;
+  }
+
   async updateFeed(id: string, update: any) {
     const { data, error } = await this.db
       .from("feeds")
