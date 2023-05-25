@@ -346,7 +346,7 @@ export class InboundMailer {
 
   async getProcessedJobsCountInLastMonth(
     user_id: string,
-    current_period_start: Date, 
+    current_period_start: Date,
     current_period_end: Date
   ) {
     let total: any = [];
@@ -389,7 +389,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
@@ -429,7 +429,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
@@ -457,7 +457,7 @@ export class InboundMailer {
       .eq("user_id", user_id)
       .eq("status", "processed")
       .gte("created_at", formatISO(current_period_start))
-      .lte("created_at", formatISO(current_period_end))
+      .lte("created_at", formatISO(current_period_end));
 
     return { data, error };
   }
@@ -466,6 +466,19 @@ export class InboundMailer {
     const { data, error } = await this.db
       .from("emails")
       .update({ status: "processed" })
+      .in("id", email_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateEmailsAsFailed(
+    user_id: string,
+    email_ids: string[],
+    errorMessage: string
+  ) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ status: "failed", error: errorMessage })
       .in("id", email_ids)
       .eq("user_id", user_id);
     return { data, error };
@@ -480,10 +493,36 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async updateInboundUrlsAsFailed(
+    user_id: string,
+    url_ids: string[],
+    errorMessage: string
+  ) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .update({ status: "failed", error: errorMessage })
+      .in("id", url_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
   async updateInboundTextAsProcessed(user_id: string, url_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_text")
       .update({ status: "processed" })
+      .in("id", url_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateInboundTextAsFailed(
+    user_id: string,
+    url_ids: string[],
+    errorMessage: string
+  ) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ status: "failed", error: errorMessage })
       .in("id", url_ids)
       .eq("user_id", user_id);
     return { data, error };
