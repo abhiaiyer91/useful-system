@@ -193,6 +193,7 @@ export class InboundMailer {
       .limit(1);
 
     if (error) {
+      console.error("error found", error);
       throw new Error(error.message);
     }
 
@@ -308,6 +309,42 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async getArchivedEmailsByFeedId(feed_id: string, limit = 5) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "archived")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getArchivedUrlsByFeedId(feed_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "archived")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getArchivedTextByFeedId(feed_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("feed_id", feed_id)
+      .eq("status", "archived")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
   async getProcessedEmails(user_id: string, limit = 5) {
     const { data, error } = await this.db
       .from("emails")
@@ -338,6 +375,42 @@ export class InboundMailer {
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getArchivedEmails(user_id: string, limit = 5) {
+    const { data, error } = await this.db
+      .from("emails")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "archived")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getArchivedUrls(user_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "archived")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getArchivedText(user_id: string, limit: 5) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .select("*")
+      .eq("user_id", user_id)
+      .eq("status", "archived")
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -387,7 +460,7 @@ export class InboundMailer {
       .from("emails")
       .select("*")
       .eq("user_id", user_id)
-      .eq("status", "processed")
+      .in("status", ["processed", "archived"])
       .gte("created_at", formatISO(current_period_start))
       .lte("created_at", formatISO(current_period_end));
 
@@ -408,7 +481,7 @@ export class InboundMailer {
 
   async getProcessedUrlsInLastDay(user_id: string) {
     const { data, error } = await this.db
-      .from("inbound_urls")
+      .from("inbound_url")
       .select("*")
       .eq("user_id", user_id)
       .eq("status", "processed")
@@ -424,10 +497,10 @@ export class InboundMailer {
     current_period_end: Date
   ) {
     const { data, error } = await this.db
-      .from("inbound_urls")
+      .from("inbound_url")
       .select("*")
       .eq("user_id", user_id)
-      .eq("status", "processed")
+      .in("status", ["processed", "archived"])
       .gte("created_at", formatISO(current_period_start))
       .lte("created_at", formatISO(current_period_end));
 
@@ -455,7 +528,7 @@ export class InboundMailer {
       .from("inbound_text")
       .select("*")
       .eq("user_id", user_id)
-      .eq("status", "processed")
+      .in("status", ["processed", "archived"])
       .gte("created_at", formatISO(current_period_start))
       .lte("created_at", formatISO(current_period_end));
 
@@ -556,6 +629,33 @@ export class InboundMailer {
   }
 
   async updateInboundUrlsAsCancelled(user_id: string, url_ids: string[]) {
+    const { data, error } = await this.db
+      .from("inbound_url")
+      .update({ status: "cancelled" })
+      .in("id", url_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateEmailsAsArchived(user_id: string, email_ids: string[]) {
+    const { data, error } = await this.db
+      .from("emails")
+      .update({ status: "cancelled" })
+      .in("id", email_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateInboundTextAsArchived(user_id: string, text_ids: string[]) {
+    const { data, error } = await this.db
+      .from("inbound_text")
+      .update({ status: "cancelled" })
+      .in("id", text_ids)
+      .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async updateInboundUrlsAsArchived(user_id: string, url_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_url")
       .update({ status: "cancelled" })
