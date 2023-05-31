@@ -640,7 +640,7 @@ export class InboundMailer {
   async updateEmailsAsArchived(user_id: string, email_ids: string[]) {
     const { data, error } = await this.db
       .from("emails")
-      .update({ status: "cancelled" })
+      .update({ status: "archived" })
       .in("id", email_ids)
       .eq("user_id", user_id);
     return { data, error };
@@ -649,7 +649,7 @@ export class InboundMailer {
   async updateInboundTextAsArchived(user_id: string, text_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_text")
-      .update({ status: "cancelled" })
+      .update({ status: "archived" })
       .in("id", text_ids)
       .eq("user_id", user_id);
     return { data, error };
@@ -658,7 +658,7 @@ export class InboundMailer {
   async updateInboundUrlsAsArchived(user_id: string, url_ids: string[]) {
     const { data, error } = await this.db
       .from("inbound_url")
-      .update({ status: "cancelled" })
+      .update({ status: "archived" })
       .in("id", url_ids)
       .eq("user_id", user_id);
     return { data, error };
