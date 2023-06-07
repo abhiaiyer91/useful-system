@@ -215,7 +215,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getUnprocessedEmails(user_id: string, limit = 5) {
+  async getUnprocessedEmails(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
@@ -273,7 +273,19 @@ export class InboundMailer {
     return items;
   }
 
-  async getProcessedEmailsByFeedId(feed_id: string, limit = 5) {
+  async getProcessedEpisodesByFeedIds(feed_ids: string[], limit: number = 20) {
+    const { data, error } = await this.db
+      .from("episodes_view")
+      .select("*")
+      .in("feed_id", feed_ids)
+      .eq("status", "processed")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    return { data, error };
+  }
+
+  async getProcessedEmailsByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
@@ -285,7 +297,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedUrlsByFeedId(feed_id: string, limit: 5) {
+  async getProcessedUrlsByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_url")
       .select("*")
@@ -297,7 +309,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedTextByFeedId(feed_id: string, limit: 5) {
+  async getProcessedTextByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_text")
       .select("*")
@@ -309,7 +321,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedEmailsByFeedId(feed_id: string, limit = 5) {
+  async getArchivedEmailsByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
@@ -321,7 +333,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedUrlsByFeedId(feed_id: string, limit: 5) {
+  async getArchivedUrlsByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_url")
       .select("*")
@@ -333,7 +345,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedTextByFeedId(feed_id: string, limit: 5) {
+  async getArchivedTextByFeedId(feed_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_text")
       .select("*")
@@ -345,7 +357,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedEmails(user_id: string, limit = 5) {
+  async getProcessedEmails(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
@@ -357,7 +369,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedUrls(user_id: string, limit: 5) {
+  async getProcessedUrls(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_url")
       .select("*")
@@ -369,7 +381,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getProcessedText(user_id: string, limit: 5) {
+  async getProcessedText(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_text")
       .select("*")
@@ -381,7 +393,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedEmails(user_id: string, limit = 5) {
+  async getArchivedEmails(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("emails")
       .select("*")
@@ -393,7 +405,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedUrls(user_id: string, limit: 5) {
+  async getArchivedUrls(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_url")
       .select("*")
@@ -405,7 +417,7 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async getArchivedText(user_id: string, limit: 5) {
+  async getArchivedText(user_id: string, limit: number = 5) {
     const { data, error } = await this.db
       .from("inbound_text")
       .select("*")
@@ -661,6 +673,43 @@ export class InboundMailer {
       .update({ status: "archived" })
       .in("id", url_ids)
       .eq("user_id", user_id);
+    return { data, error };
+  }
+
+  async insertFeedSubscription(user_id: string, feed_id: string) {
+    const { data, error } = await this.db
+      .from("feed_subscriptions")
+      .insert({
+        user_id,
+        feed_id,
+      })
+      .select()
+      .single();
+    return { data, error };
+  }
+
+  async deleteFeedSubscription(user_id: string, feed_id: string) {
+    const { data, error } = await this.db
+      .from("feed_subscriptions")
+      .delete()
+      .match({ user_id, feed_id });
+    return { data, error };
+  }
+
+  async getFeedSubscription(user_id: string, feed_id: string) {
+    const { data, error } = await this.db
+      .from("feed_subscriptions")
+      .select("*")
+      .match({ user_id, feed_id })
+      .maybeSingle();
+    return { data, error };
+  }
+
+  async getFeedSubscriptionsByUserId(user_id: string) {
+    const { data, error } = await this.db
+      .from("feed_subscriptions")
+      .select("*")
+      .match({ user_id });
     return { data, error };
   }
 
