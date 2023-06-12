@@ -280,8 +280,7 @@ export class InboundMailer {
       .from("emails")
       .select("*")
       .eq("feed_id", feed_id)
-      .neq("status", "processed")
-      .neq("status", "cancelled")
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -292,8 +291,7 @@ export class InboundMailer {
       .from("inbound_url")
       .select("*")
       .eq("feed_id", feed_id)
-      .neq("status", "processed")
-      .neq("status", "cancelled")
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (urlError) {
@@ -304,8 +302,7 @@ export class InboundMailer {
       .from("inbound_text")
       .select("*")
       .eq("feed_id", feed_id)
-      .neq("status", "processed")
-      .neq("status", "cancelled")
+      .eq("status", "pending")
       .order("created_at", { ascending: false });
 
     if (textError) {
