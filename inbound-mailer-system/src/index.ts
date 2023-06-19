@@ -88,10 +88,7 @@ export class InboundMailer {
   }
 
   async deleteImageFromStorage(bucket: string, path: string) {
-    const { data, error } = await this.db
-      .storage
-      .from(bucket)
-      .remove([path]);
+    const { data, error } = await this.db.storage.from(bucket).remove([path]);
 
     if (error) {
       throw new Error(error.message);
@@ -145,8 +142,7 @@ export class InboundMailer {
   }
 
   async getFeedImage(user_id: string, feed_id: string) {
-    const { data, error } = await this.db
-      .storage
+    const { data, error } = await this.db.storage
       .from("feed_images")
       .list(user_id + "/" + feed_id, { limit: 1 });
 
@@ -155,14 +151,17 @@ export class InboundMailer {
     }
 
     return data;
-  };
+  }
 
-  async getStorageFilesByPath(bucket: string, path:string, limit: number = 100) { 
-    const { data, error } = await this.db
-      .storage
+  async getStorageFilesByPath(
+    bucket: string,
+    path: string,
+    limit: number = 100
+  ) {
+    const { data, error } = await this.db.storage
       .from(bucket)
-      .list(path, { limit });      
-    
+      .list(path, { limit });
+
     if (error) {
       throw new Error(error.message);
     }
@@ -171,13 +170,10 @@ export class InboundMailer {
   }
 
   async getPublicUrlFromBucket(bucketId: string, path: string) {
-    const { data } = await this.db
-      .storage
-      .from(bucketId)
-      .getPublicUrl(path);
+    const { data } = await this.db.storage.from(bucketId).getPublicUrl(path);
 
     return data;
-  };
+  }
 
   async isFeedPathAvailable(path: string) {
     const { data, error } = await this.db
@@ -757,20 +753,28 @@ export class InboundMailer {
       .match({ user_id });
     return { data, error };
   }
-  
-  
-  async uploadImage(bucket: string, path: string, mimeType: string, file: any, upsert: boolean = true) {
-    const { data, error } = await this.db
-      .storage
+
+  async uploadImage(
+    bucket: string,
+    path: string,
+    mimeType: string,
+    file: any,
+    upsert: boolean = true
+  ) {
+    const { data, error } = await this.db.storage
       .from(bucket)
-      .upload(path, file, { contentType: mimeType, cacheControl: "3600", upsert: upsert });
+      .upload(path, file, {
+        contentType: mimeType,
+        cacheControl: "3600",
+        upsert: upsert,
+      });
 
     if (error) {
       throw new Error(error.message);
     }
 
     return data;
-  };
+  }
 
   async processMail(generator: string, content_column: string = "text") {
     const generatorFn = this.generators[generator];
@@ -1115,5 +1119,31 @@ export class InboundMailer {
     }
 
     return emailData?.[0];
+  }
+
+  // url_episode_map ops
+  async getEpisodeByUrl(path: string) {
+    const { data, error } = await this.db
+      .from("url_episode_map")
+      .select("id")
+      .eq("url", path)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+  async insertUrlEpisodeMap(url: string, episode_id: string) {
+    const { data, error } = await this.db
+      .from("url_episode_map")
+      .insert({
+        url,
+        episode_id,
+      })
+      .select()
+      .single();
+    return { data, error };
   }
 }
