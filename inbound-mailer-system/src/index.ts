@@ -1125,7 +1125,7 @@ export class InboundMailer {
   async getEpisodeByUrl(path: string) {
     const { data, error } = await this.db
       .from("url_episode_map")
-      .select("id")
+      .select("id, episode_id")
       .eq("url", path)
       .limit(1);
 
