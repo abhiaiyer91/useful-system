@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import pMap from "p-map";
 import { orderBy } from "lodash";
-import { addDays, formatISO, subDays } from "date-fns";
+import { formatISO, subDays } from "date-fns";
 import * as yup from "yup";
 
 // Sendgrid docs link: https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook
@@ -1121,6 +1121,20 @@ export class InboundMailer {
     return emailData?.[0];
   }
 
+  async getEpisodeViewById(episode_id: string) {
+    const { data, error } = await this.db
+      .from("episodes_view")
+      .select("*")
+      .eq("id", episode_id)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+
   // url_episode_map ops
   async getEpisodeByUrl(path: string) {
     const { data, error } = await this.db
@@ -1135,6 +1149,7 @@ export class InboundMailer {
 
     return data[0];
   }
+
   async insertUrlEpisodeMap(url: string, episode_id: string) {
     const { data, error } = await this.db
       .from("url_episode_map")
