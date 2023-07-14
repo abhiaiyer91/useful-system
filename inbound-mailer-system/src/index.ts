@@ -1144,6 +1144,15 @@ export class InboundMailer {
     return { data, error };
   }
 
+  async insertLinkAnalytics(analytics: any) {
+    const { data, error } = await this.db
+      .from("link_analytics")
+      .insert(analytics)
+      .select()
+      .single();
+    return { data, error };
+  }
+
   // url_episode_map ops
   async getEpisodeByUrl(path: string) {
     const { data, error } = await this.db
