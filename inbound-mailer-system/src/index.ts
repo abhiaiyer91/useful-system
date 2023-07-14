@@ -1170,4 +1170,75 @@ export class InboundMailer {
       .single();
     return { data, error };
   }
+
+  async getEpisodeById(episode_id: string) {
+    const { data, error } = await this.db
+      .from("episodes")
+      .select("*")
+      .eq("id", episode_id)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data[0];
+  }
+  
+
+  async insertEpisode(
+    user_id: string,
+    image: string,
+    title: string,
+    transcript: string,
+    show_notes: string,
+    publish_date: Date,
+    status: string,
+    audio_file: string,
+    duration: number
+  ) {
+    const { data, error } = await this.db
+      .from("episodes")
+      .insert({
+        user_id,
+        image,
+        title,
+        transcript,
+        show_notes,
+        publish_date,
+        status,
+        audio_file,
+        duration,
+      })
+      .select()
+      .single();
+    return { data, error };
+  }
+
+  async updateEpisode(
+    episode_id: string,
+    image: string,
+    title: string,
+    transcript: string,
+    show_notes: string,
+    publish_date: Date,
+    status: string,
+    audio_file: string,
+    duration: number
+  ) {
+    const { data, error } = await this.db
+      .from("episodes")
+      .update({
+        image,
+        title,
+        transcript,
+        show_notes,
+        publish_date,
+        status,
+        audio_file,
+        duration,
+      })
+      .eq("id", episode_id);
+    return { data, error };
+  }
 }
