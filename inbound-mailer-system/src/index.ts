@@ -1204,7 +1204,9 @@ export class InboundMailer {
     publish_date: Date,
     status: string,
     audio_file: string,
-    duration: number
+    duration: number,
+    image_url: string,
+    category: string,
   ) {
     const { data, error } = await this.db
       .from("episodes")
@@ -1218,6 +1220,8 @@ export class InboundMailer {
         status,
         audio_file,
         duration,
+        image_url,
+        category,
       })
       .select()
       .single();
@@ -1233,7 +1237,9 @@ export class InboundMailer {
     publish_date: Date,
     status: string,
     audio_file: string,
-    duration: number
+    duration: number,
+    image_url: string,
+    category: string,
   ) {
     const { data, error } = await this.db
       .from("episodes")
@@ -1246,6 +1252,8 @@ export class InboundMailer {
         status,
         audio_file,
         duration,
+        image_url,
+        category,
       })
       .eq("id", episode_id);
     return { data, error };
