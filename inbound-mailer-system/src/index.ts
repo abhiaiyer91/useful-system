@@ -1193,7 +1193,6 @@ export class InboundMailer {
 
     return data[0];
   }
-  
 
   async insertEpisode(
     user_id: string,
@@ -1206,7 +1205,7 @@ export class InboundMailer {
     audio_file: string,
     duration: number,
     image_url: string,
-    category: string,
+    category: string
   ) {
     const { data, error } = await this.db
       .from("episodes")
@@ -1228,33 +1227,10 @@ export class InboundMailer {
     return { data, error };
   }
 
-  async updateEpisode(
-    episode_id: string,
-    image: string,
-    title: string,
-    transcript: string,
-    show_notes: string,
-    publish_date: Date,
-    status: string,
-    audio_file: string,
-    duration: number,
-    image_url: string,
-    category: string,
-  ) {
+  async updateEpisode(episode_id: string, update: any) {
     const { data, error } = await this.db
       .from("episodes")
-      .update({
-        image,
-        title,
-        transcript,
-        show_notes,
-        publish_date,
-        status,
-        audio_file,
-        duration,
-        image_url,
-        category,
-      })
+      .update(update)
       .eq("id", episode_id);
     return { data, error };
   }
