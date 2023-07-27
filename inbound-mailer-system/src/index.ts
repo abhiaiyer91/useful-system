@@ -1196,6 +1196,7 @@ export class InboundMailer {
 
   async insertEpisode(
     user_id: string,
+    feed_id: string,
     title: string,
     transcript: string,
     show_notes: string,
@@ -1210,6 +1211,7 @@ export class InboundMailer {
       .from("episodes")
       .insert({
         user_id,
+        feed_id,
         title,
         transcript,
         show_notes,
