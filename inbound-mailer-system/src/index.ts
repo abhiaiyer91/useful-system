@@ -1135,6 +1135,25 @@ export class InboundMailer {
     return data[0];
   }
 
+  async getEpisodesByFeedId(feed_id: string, limit: number) {
+    const getEpisodesPromise = this.db
+      .from("episodes")
+      .select("*")
+      .eq("feed_id", feed_id);
+
+    if (limit) {
+      getEpisodesPromise.limit(limit);
+    }
+
+    const {data, error } = await getEpisodesPromise;
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
   async insertEpisodeAnalytics(analytics: any) {
     const { data, error } = await this.db
       .from("episode_analytics")
