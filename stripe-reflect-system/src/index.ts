@@ -46,6 +46,9 @@ export class StripeReflection {
       description: product.description,
       image: product.images?.[0] ?? null,
       metadata: product.metadata,
+      features: Array.isArray(product.metadata?.features)
+        ? product.metadata.features.map((feature: any) => feature.name)
+        : null,
     });
 
     if (error) {
@@ -100,6 +103,19 @@ export class StripeReflection {
     const { data, error } = await this.db
       .from("prices")
       .select()
+      .eq("active", true);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  async getProductsWithPrices() {
+    const { data, error } = await this.db
+      .from("products")
+      .select("*, prices(*)")
       .eq("active", true);
 
     if (error) {
