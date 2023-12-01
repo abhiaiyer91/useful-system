@@ -46,8 +46,8 @@ export class StripeReflection {
       description: product.description,
       image: product.images?.[0] ?? null,
       metadata: product.metadata,
-      features: Array.isArray(product.metadata?.features)
-        ? product.metadata.features.map((feature: any) => feature.name)
+      features: Array.isArray(product?.features)
+        ? product.features.map((feature: any) => feature.name)
         : null,
     });
 
